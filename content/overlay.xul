@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<overlay id="tababbreviations" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="application/x-javascript" src="chrome://uglifyjs/content/uglify-ext.js" />
+
+    <commandset id="allcommands">
+      <command id="Tasks:UglifyCompileFile" oncommand="extensions.uglify.compressFile(true);"/>
+      <command id="Tasks:UglifyCompileBuffer" oncommand="extensions.uglify.compressBuffer();"/>
+      <command id="Tasks:UglifyCompileSelection" oncommand="extensions.uglify.compressSelection();"/>
+    </commandset>
+
+    <menupopup id="popup_tools">
+      <menu id="menu_uglify" label="UglifyJS">
+        <menupopup id="menu_uglify_popup">
+          <menuitem id="menu_uglify_file"
+                  label="Compressed Saved JS File "
+                  observes="Tasks:UglifyCompileFile"
+                  class="menu-iconic-wide" />
+          <menuitem id="menu_uglify_buffer"
+                  label="Compress Current Buffer"
+                  observes="Tasks:UglifyCompileBuffer"
+                  class="menu-iconic-wide" />
+          <menuitem id="menu_uglify_selection"
+                  label="Compress Selection"
+                  observes="Tasks:UglifyCompileSelection"
+                  class="menu-iconic-wide" />
+        </menupopup>
+      </menu>
+    </menupopup>
+    
+    <menupopup id="editorContextMenu">
+      <menu id="menu_uglify_context" label="UglifyJS">
+          <menupopup id="menu_uglify_context_popup">
+            <menuitem id="menu_uglify_context_file"
+                    label="Compress Saved JS File"
+                    observes="Tasks:UglifyCompileFile"
+                    class="menu-iconic-wide" />
+            <menuitem id="menu_uglify_context_buffer"
+                    label="Compress Current Buffer"
+                    observes="Tasks:UglifyCompileBuffer"
+                    class="menu-iconic-wide" />
+            <menuitem id="menu_uglify_context_selection"
+                    label="Compress Selection"
+                    observes="Tasks:UglifyCompileSelection"
+                    class="menu-iconic-wide" />
+          </menupopup>
+      </menu>
+    </menupopup>
+</overlay>
