@@ -10,7 +10,7 @@ xtk.load('chrome://uglifyjs/content/uglifyweb-1.1.1.js');
  * Namespaces
  */
 if (typeof(extensions) === 'undefined') extensions = {};
-if (typeof(extensions.uglify) === 'undefined') extensions.uglify = { version : '0.0.1' };
+if (typeof(extensions.uglify) === 'undefined') extensions.uglify = { version : '1.0.0' };
 
 (function() {
 	var self = this;
@@ -18,7 +18,7 @@ if (typeof(extensions.uglify) === 'undefined') extensions.uglify = { version : '
 	this.compressFile = function(showWarning) {
 		showWarning = showWarning || false;
 		
-		var d = ko.views.manager.currentView.document,
+		var d = ko.views.manager.currentView.document || ko.views.manager.currentView.koDoc,
 			file = d.file,
 			path = (file) ? file.path : null;
 		
@@ -53,7 +53,7 @@ if (typeof(extensions.uglify) === 'undefined') extensions.uglify = { version : '
 	
 	this.compressBuffer = function() {
 		try {
-			var d = ko.views.manager.currentView.document,
+			var d = ko.views.manager.currentView.document || ko.views.manager.currentView.koDoc,
 				output = uglify(d.buffer);
 			
 			if (output) {
