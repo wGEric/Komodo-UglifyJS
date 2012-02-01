@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<overlay id="tababbreviations" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script type="application/x-javascript" src="chrome://uglifyjs/content/uglify-ext.js" />
+<overlay id="uglifyjs" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="application/x-javascript" src="chrome://uglifyjs/content/overlay.js" />
 
     <commandset id="allcommands">
       <command id="Tasks:UglifyCompileFile" oncommand="extensions.uglify.compressFile(true);"/>
@@ -26,7 +26,7 @@
         </menupopup>
       </menu>
     </menupopup>
-    
+
     <menupopup id="editorContextMenu">
       <menu id="menu_uglify_context" label="UglifyJS">
           <menupopup id="menu_uglify_context_popup">

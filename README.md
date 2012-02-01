@@ -1,10 +1,10 @@
 # About
 
-Implements [UglifyJS](https://github.com/mishoo/UglifyJS) into [Komodo](http://www.activestate.com/komodo-ide). 
+Implements [UglifyJS](https://github.com/mishoo/UglifyJS) into [Komodo](http://www.activestate.com/komodo-ide).
 
 # Install
 
-http://docs.activestate.com/komodo/6.1/tutorial/tourlet_extensions.html#tourlet_install_extension_top
+[Download the lastest version](https://github.com/wGEric/Komodo-UglifyJS/downloads) and open with Komodo or [follow these instructions](http://docs.activestate.com/komodo/6.1/tutorial/tourlet_extensions.html#tourlet_install_extension_top)
 
 # Use
 
@@ -21,3 +21,11 @@ You can [create a macro](http://docs.activestate.com/komodo/6.1/macros.html#macr
     if (extensions.uglify) {
         extensions.uglify.compressFile();
     }
+
+# Change Log
+
+## 1.1.0
+
+* Updated UglifyJS compressor to v1.2.5
+* Added support for saving remote files
+* Added a preference pane to choose the file extension (.min.js) and disable debug messages when saving files

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+
+<prefwindow id="uglifyjs-prefs"
+     title="UglifyJS Preferences"
+     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+	<prefpane id="uglifyjs-pane" label="UglifyJS Preferences">
+	  <preferences>
+		<preference id="pref_showMessages" name="extensions.uglifyjs.showMessages" type="bool"/>
+		<preference id="pref_extension" name="extensions.uglifyjs.extension" type="string"/>
+	  </preferences>
+
+	  <hbox align="center">
+		<checkbox id="showMessages" preference="pref_showMessages" label="Show console messages when saving files" />
+	  </hbox>
+	  <hbox align="center">
+		<label control="extension" value="File Extension: "/>
+		<textbox preference="pref_extension" id="extension" />
+	  </hbox>
+	</prefpane>
+
+</prefwindow>
