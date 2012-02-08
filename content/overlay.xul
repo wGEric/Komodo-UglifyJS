@@ -3,9 +3,9 @@
 	<script type="application/x-javascript" src="chrome://uglifyjs/content/overlay.js" />
 
     <commandset id="allcommands">
-      <command id="Tasks:UglifyCompileFile" oncommand="extensions.uglify.compressFile(true);"/>
-      <command id="Tasks:UglifyCompileBuffer" oncommand="extensions.uglify.compressBuffer();"/>
-      <command id="Tasks:UglifyCompileSelection" oncommand="extensions.uglify.compressSelection();"/>
+      <command id="Tasks:UglifyCompileFile" oncommand="ko.extensions.uglifyjs.compressFile(true);"/>
+      <command id="Tasks:UglifyCompileBuffer" oncommand="ko.extensions.uglifyjs.compressBuffer();"/>
+      <command id="Tasks:UglifyCompileSelection" oncommand="ko.extensions.uglifyjs.compressSelection();"/>
     </commandset>
 
     <menupopup id="popup_tools">

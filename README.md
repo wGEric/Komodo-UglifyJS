@@ -18,11 +18,18 @@ Goto to Tools -> UglifyJS and select an option.
 
 You can [create a macro](http://docs.activestate.com/komodo/6.1/macros.html#macros_top) that will automatically compress a JavaScript file when you save. Use the following code and have it trigger _After file save_:
 
-    if (extensions.uglify) {
-        extensions.uglify.compressFile();
+    if (ko.extensions.uglifyjs) {
+        ko.extensions.uglifyjs.compressFile();
     }
 
 # Change Log
+
+## 2.0.0
+
+* Addon is now written in CoffeeScript
+* `ko.extensions.uglifyjs.compressFile('path/to/file')` is now available
+* Komodo 7 uses Notifications pane instead of the Command Output
+* Updating internal dependencies
 
 ## 1.1.0
 

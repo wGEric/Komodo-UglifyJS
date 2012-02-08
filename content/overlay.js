@@ -1,116 +1,191 @@
-// tools for common Komodo extension chores
-xtk.load('chrome://uglifyjs/content/toolkit.js');
-// Komodo console in Output Window
-xtk.load('chrome://uglifyjs/content/konsole.js');
+/*
+Copyright (C) 2012 Eric Faerber
 
-// UglifyWeb (https://github.com/jrburke/uglifyweb)
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 xtk.load('chrome://uglifyjs/content/uglifyweb.js');
 
-/**
- * Namespaces
- */
-if (typeof(extensions) === 'undefined') extensions = {};
-if (typeof(extensions.uglify) === 'undefined') extensions.uglify = { version : '1.1.0' };
+if (ko.extensions == null) ko.extensions = {};
 
-(function() {
-	var self = this;
+ko.extensions.uglifyjs = (function() {
+  var msgLevels, prefs,
+    _this = this;
+  this.version = '2.0.0';
+  prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.uglifyjs.");
+  if (ko.notifications) {
+    msgLevels = {
+      INFO: Components.interfaces.koINotification.SEVERITY_INFO,
+      WARNING: Components.interfaces.koINotification.SEVERITY_WARNING,
+      ERROR: Components.interfaces.koINotification.SEVERITY_ERROR
+    };
+  } else {
+    xtk.load('chrome://uglifyjs/content/konsole.js');
+    msgLevels = {
+      INFO: konsole.S_OK,
+      WARNING: konsole.S_WARNING,
+      ERROR: konsole.S_ERROR
+    };
+  }
+  /*
+  	compresses the current file
+  */
+  this.compressFile = function(filepath, showWarning) {
+    var contents, d, file, newFilename, output, path;
+    if (filepath == null) filepath = null;
+    if (showWarning == null) showWarning = false;
+    _this._removeLog();
+    if (typeof filepath === "boolean") {
+      showWarning = filepath;
+      filepath = null;
+    }
+    if (filepath !== null) {
+      file = _this._getFile(filepath);
+      file.open('r');
+      contents = file.readfile();
+    } else {
+      d = _this._getCurrentDoc();
+      file = d.file;
+      contents = d.buffer;
+    }
+    if (!file) {
+      _this._log('Please save the file first', msgLevels.ERROR, 'Did you mean to compress the buffer?');
+      return false;
+    }
+    if (file.ext === '.js') {
+      output = _this._compress(contents);
+      if (output) {
+        path = file.URI;
+        newFilename = path.replace('.js', prefs.getCharPref('extension'));
+        return _this._saveFile(newFilename, output);
+      }
+    } else if (showWarning) {
+      _this._log('Not a Javacript file', msgLevels.ERROR);
+    }
+    return false;
+  };
+  /*
+  	compresses the current buffer
+  */
+  this.compressBuffer = function() {
+    var d, output;
+    _this._removeLog();
+    d = _this._getCurrentDoc();
+    output = _this._compress(d.buffer);
+    if (output !== false) {
+      d.buffer = output;
+      return true;
+    }
+    return false;
+  };
+  /*
+  	compress the current selection
+  */
+  this.compressSelection = function() {
+    var output, scimoz, text, view;
+    _this._removeLog();
+    view = ko.views.manager.currentView;
+    scimoz = view.scintilla.scimoz;
+    text = scimoz.selText;
+    output = _this._compress(text);
+    if (output) {
+      scimoz.targetStart = scimoz.currentPos;
+      scimoz.targetEnd = scimoz.anchor;
+      scimoz.replaceTarget(output.length, output);
+      return true;
+    }
+    return false;
+  };
+  /*
+  	gets the current document
+  */
+  this._getCurrentDoc = function() {
+    return ko.views.manager.currentView.document || ko.views.manager.currentView.koDoc;
+  };
+  /*
+  	reads an external file
+  */
+  this._getFile = function(filepath) {
+    var reader;
+    reader = Components.classes["@activestate.com/koFileEx;1"].createInstance(Components.interfaces.koIFileEx);
+    reader.path = filepath;
+    return reader;
+  };
+  /*
+  	compress a string
+  */
+  this._compress = function(text) {
+    var output;
+    try {
+      output = uglify(text);
+    } catch (e) {
+      _this._log('Error compressing javascript', msgLevels.ERROR, e.message);
+    }
+    return output || false;
+  };
+  /*
+  	saves a file
+  */
+  this._saveFile = function(filepath, filecontent) {
+    var file;
+    try {
+      _this._log('Saving file as: ' + filepath, msgLevels.INFO);
+      file = Components.classes["@activestate.com/koFileEx;1"].createInstance(Components.interfaces.koIFileEx);
+      file.path = filepath;
+      file.open('w');
+      file.puts(filecontent);
+      file.close();
+      _this._log('File saved as: ' + filepath, msgLevels.INFO);
+    } catch (e) {
+      _this._log('Error saving file', msgLevels.ERROR, e.message);
+      return false;
+    }
+    return true;
+  };
+  /*
+  	removes entry from the notifications
+  */
+  this._removeLog = function() {
+    if (!prefs.getBoolPref('showMessages') && ko.notifications && _this.notification) {
+      ko.notifications.remove(_this.notification);
+    }
+    return true;
+  };
+  /*
+  	writes to the log
+  */
+  this._log = function(msg, level, description) {
+    var noteId;
+    if (level == null) level = msgLevels.INFO;
+    if (description == null) description = '';
+    if (level === msgLevels.ERROR || prefs.getBoolPref('showMessages')) {
+      if (ko.notifications) {
+        noteId = !prefs.getBoolPref('showMessages') ? 'uglifyjs' : 'uglifyjs' + (new Date().getTime());
+        _this.notification = ko.notifications.add(msg, ['UglifyJS'], noteId, {
+          severity: level,
+          description: description
+        });
+      } else {
+        if (description !== '') description = ': ' + description;
+        konsole.popup();
+        konsole.writeln('[UglifyJS] ' + msg + description, level);
+      }
+    }
+    return true;
+  };
+  return this;
+})();
 
-	var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-        .getService(Components.interfaces.nsIPrefService).getBranch("extensions.uglifyjs.");
+if (typeof extensions === "undefined" || extensions === null) extensions = {};
 
-	this.compressFile = function(showWarning) {
-		showWarning = showWarning || false;
-
-		var d = ko.views.manager.currentView.document || ko.views.manager.currentView.koDoc,
-			file = d.file,
-			path = (file) ? file.URI : null;
-
-		if (!file) {
-			self._log('Please save the file first', konsole.S_ERROR);
-			return;
-		}
-
-		if (file.ext == '.js') {
-			self._log('Compressing Javascript file', konsole.S_DEBUG);
-
-			try {
-				var output = uglify(d.buffer),
-					newFilename = path.replace('.js', prefs.getCharPref('extension'));
-
-				if (output) {
-					self._saveFile(newFilename, output);
-					self._log('File saved', konsole.S_OK);
-				} else {
-					self._log('Error parsing JavaScript', konsole.S_ERROR);
-				}
-			}
-			catch(e) {
-				self._log('Error parsing JavaScript', konsole.S_ERROR);
-			}
-		} else {
-			if (showWarning) {
-				self._log('Not a JavaScript file', konsole.S_ERROR);
-			}
-		}
-	};
-
-	this.compressBuffer = function() {
-		try {
-			var d = ko.views.manager.currentView.document || ko.views.manager.currentView.koDoc,
-				output = uglify(d.buffer);
-
-			if (output) {
-				d.buffer = output;
-			} else {
-				self._log('Error parsing JavaScript', konsole.S_ERROR);
-			}
-		}
-		catch(e) {
-			self._log('Error parsing JavaScript', konsole.S_ERROR);
-		}
-	};
-
-	this.compressSelection = function() {
-		var view = ko.views.manager.currentView,
-			scimoz = view.scintilla.scimoz;
-			text = scimoz.selText;
-
-		try {
-			var output = uglify(text);
-
-			if (output) {
-				scimoz.targetStart = scimoz.currentPos;
-				scimoz.targetEnd = scimoz.anchor;
-				scimoz.replaceTarget(output.length, output);
-			} else {
-				self._log('Error parsing JavaScript', konsole.S_ERROR);
-			}
-		}
-		catch(e) {
-			self._log('Error parsing JavaScript', konsole.S_ERROR);
-		}
-	};
-
-	this._saveFile = function(filepath, filecontent) {
-		self._log('Saving file as ' + filepath, konsole.S_DEBUG);
-
-		var file = Components
-			.classes["@activestate.com/koFileEx;1"]
-			.createInstance(Components.interfaces.koIFileEx);
-		file.path = filepath;
-
-		file.open('w');
-
-		file.puts(filecontent);
-		file.close();
-
-		return;
-	};
-
-	this._log = function(message, style) {
-		if (style == konsole.S_ERROR || prefs.getBoolPref('showMessages')) {
-			konsole.popup();
-			konsole.writeln('[LESS] ' + message, style);
-		}
-	};
-}).apply(extensions.uglify);
+extensions.uglify = ko.extensions.uglifyjs;

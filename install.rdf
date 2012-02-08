@@ -4,7 +4,7 @@
     <Description about="urn:mozilla:install-manifest">
         <em:id>uglifyjs@ericfaerber.com</em:id>
         <em:name>UglifyJS</em:name>
-        <em:version>1.1.0</em:version>
+        <em:version>2.0.0</em:version>
         <em:description>Adds support for UglifyJS, a javascript compressor</em:description>
         <em:creator>Eric Faerber</em:creator>
         <em:homepageURL></em:homepageURL>
